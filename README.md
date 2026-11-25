@@ -24,6 +24,19 @@ OS name: "windows 11", version: "10.0", arch: "amd64", family: "windows"
 > JaCoCo 0.8.12 — starter-ийн `pom.xml`. `src/main` нь лабын турш **өөрчлөгдөөгүй** (Starter commit-той
 > ижил) — зөвхөн тестийг өөрчилсөн. `results/` дахь файлууд Git Bash-ийн `tee`-ээр UTF-8 текст.
 
+## Mutation score-ийн явц
+
+| Хэмжилт | Тест | `>> Generated … Killed …` | Mutation Coverage | Test Strength | Файл |
+|---|---:|---|---:|---:|---|
+| Эхлэл (starter) | 6 | `Generated 63 mutations Killed 17 (27%)` | **27%** | 27% | [`results/pit-start.txt`](results/pit-start.txt) |
+| B1 — яг утгын assertion | 6 | `Generated 63 mutations Killed 45 (71%)` | **71%** | 71% | [`results/pit-B1.txt`](results/pit-B1.txt) |
+| B2 — зааг утгын тест (эцсийн) | 14 | `Generated 63 mutations Killed 63 (100%)` | **100%** | 100% | [`results/pit-B2.txt`](results/pit-B2.txt) |
+
+Line Coverage гурвуулаа **25/25 (100%)**, "Mutations with no coverage 0" — өөрөөр хэлбэл кодын мөр
+бүр эхнээсээ ажиллаж байсан, өссөн нь зөвхөн тестийн **шалгах чадвар**.
+
+---
+
 ## Эхний хэмжилт
 
 ```bash
@@ -51,10 +64,10 @@ mvn test-compile org.pitest:pitest-maven:mutationCoverage 2>&1 | tee results/pit
 
 ## Хэсэг A: Амьд мутантуудын ангилал (эхлэл дээр 46)
 
-PIT-ийн XML тайлангаас (`mutations.xml`) мутант бүрийн мөр, оператор, тайлбарыг гаргасан.
-Ижил шалтгаантайг нэг мөрөнд нэгтгэв. "Арга хэмжээ" багана нь B1 (assertion) / B2 (зааг) төлөвлөгөө.
+PIT-ийн XML тайлангаас (`mutations.xml`) мутант бүрийн мөр, оператор, тайлбарыг гаргаж, B1 болон B2-ийн
+дараах тайлантай мутант мутантаар нь тулгасан. Ижил шалтгаантайг нэг мөрөнд нэгтгэв.
 
-| Мөр | Мутаци (PIT-ийн тайлбар) | Тоо | Ангилал | Арга хэмжээ (төлөвлөгөө) |
+| Мөр | Мутаци (PIT-ийн тайлбар) | Тоо | Ангилал | Арга хэмжээ (алсан алхам) |
 |---|---|---:|---|---|
 | 20 | changed conditional boundary (`score < 0` → `<= 0`, `score > 100` → `>= 100`) | 2 | Тест дутуу | **B2**: `letterGrade(0)="F"`, `letterGrade(100)="A"` — заагийн яг утга |
 | 23–26 | changed conditional boundary (`>= 90/80/70/60` → `>`) | 4 | Тест дутуу | **B2**: 90, 80, 70, 60 дээрх яг утга |
@@ -72,7 +85,7 @@ PIT-ийн XML тайлангаас (`mutations.xml`) мутант бүрийн 
 | 52, 53 | removed conditional — replaced comparison check with true (`&&`-ийн нэг тал) | 4 | Тест дутуу | **B2**: нэг тал хангагдаж нөгөө нь үгүй — (3.79,15), (3.8,14), (3.39,12), (3.4,11) |
 | 54 | changed conditional boundary (`>= 3.0`) | 1 | Тест дутуу | **B2**: `scholarship(3.0,0)=50`, `(2.99,0)=0` |
 | 54 | removed conditional — replaced comparison check with false / true | 2 | Тест дутуу | **B1**: 3.1 → 50 ба 2.0 → 0-ийг яг шалгана |
-| | **Нийт** | **46** | **46 тест дутуу, 0 equivalent (одоогоор)** | B1 — 28, B2 — 18 (төлөвлөгөө) |
+| | **Нийт** | **46** | **46 тест дутуу, 0 equivalent** | B1 — 28, B2 — 18 |
 
 **Ангиллын үндэслэл:**
 - **"changed conditional boundary"** (13): `>=`-ийг `>` болгох нь зөвхөн заагийн яг утга (90, 60, 3.8, 15 г.м.)
@@ -82,6 +95,99 @@ PIT-ийн XML тайлангаас (`mutations.xml`) мутант бүрийн 
 - **"Changed switch default to be first case"** (1): F дүнгийн оноог өөрчилдөг тул **тест дутуу** (доор).
 - **"removed conditional"** (21): салааг үргэлж/хэзээ ч авахгүй болгох нь өөр үр дүн буцаадаг тул **тест дутуу**;
   `&&`-ийн нэг талыг "true" болгосон 4 мутант зөвхөн тэр тал **худал**, нөгөө нь **үнэн** үед ялгардаг.
-- **Equivalent: одоогоор 0.** L36-ийн `switch` мутант equivalent байж магадгүй (String `switch` нь hash-аар
-  хоёр шатлан хөрвүүлэгддэг) гэж сэжиглэж байгаа ч, зааврын «ихэнх нь үнэндээ тест дутуу» гэснийг
-  харгалзан эхлээд B1-д F дүнгийн оноог яг шалгаж үзнэ; алагдахгүй бол equivalent гэж үндэслэнэ.
+- **Equivalent: 0.** L36-ийн `switch` мутантыг эхэндээ equivalent байж магадгүй гэж сэжиглэсэн (String `switch`
+  нь hash-аар хоёр шатлан хөрвүүлэгддэг), гэвч B1-ийн `gpa([40]) == 0.0` түүнийг алсан — зааврын
+  «Equivalent гэж ангилахдаа болгоомжтой — ихэнх нь үнэндээ тест дутуу» гэдэг энд батлагдсан.
+
+---
+
+## Хэсэг B: Тестүүдээ хүчтэй болгох
+
+### B1 — Assertion-уудыг хүчтэй болгох
+
+Starter-ийн **оролтуудыг хэвээр нь** үлдээж, сул шалгалтыг яг утгаар солив:
+
+| Өмнө | Дараа |
+|---|---|
+| `assertNotNull(calc.letterGrade(95))` | `assertEquals("A", calc.letterGrade(95))` (85→B, 75→C, 65→D, 30→F) |
+| `assertTrue(g1 >= 0 && g1 <= 4)` | `assertEquals(3.5, calc.gpa({95,85}))`, `1.5` (75,65), `0.0` (40) |
+| `assertTrue(s1 >= 0 && s1 <= 100)` | `assertEquals(100/70/50/0/0, …)` |
+
+`results/pit-B1.txt`: **`Generated 63 mutations Killed 45 (71%)`** — 28 мутант нэмж алагдсан.
+
+### B2 — Зааг утгын тестүүд
+
+| Тест | Шалгах заагууд |
+|---|---|
+| `letterGrade_boundaries_eachSideOfEveryLimit` | 100, 90/89.99, 80/79.99, 70/69.99, 60/59.99, 0 |
+| `letterGrade_justOutsideRange_throws` | −0.01, 100.01 |
+| `gpa_eachLetterGrade_mapsToExactPoints` | A/B/C/D/F тус бүр (4/3/2/1/0) + бүгд хамт = 2.0 |
+| `scholarship_boundary_3_8_and_15` | (3.8,15)=100, (3.79,15)=70, (3.8,14)=70 |
+| `scholarship_boundary_3_4_and_12` | (3.4,12)=70, (3.39,12)=50, (3.4,11)=50 |
+| `scholarship_boundary_3_0` | (3.0,0)=50, (2.99,0)=0 |
+| `scholarship_inputLimits_areValid` | gpa 0, credits 0 → 0; gpa 4 → 100 |
+| `scholarship_justOutsideInputLimits_throws` | gpa −0.01, 4.01, credits −1 |
+
+`results/pit-B2.txt`: **`Generated 63 mutations Killed 63 (100%)`**, `Test strength 100%` — зорилт (≥ 85%) давсан;
+амьд мутант үлдээгүй тул equivalent-аар хасах шаардлагагүй.
+
+![PIT — эцсийн: Mutation Coverage 63/63](screenshots/pit-final.png)
+
+---
+
+## Хэсэг C: Гараар нэг мутант — PIT-гүйгээр
+
+### Гар мутаци: `gpa >= 3.8` → `gpa > 3.8` (52-р мөр)
+
+```bash
+mvn test 2>&1 | tee results/mvn-test-manual-mutant.txt
+```
+
+```
+[ERROR] mn.edu.must.sqat.ScholarshipCalculatorTest.scholarship_boundary_3_8_and_15 <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <100> but was: <70>
+[ERROR] Tests run: 14, Failures: 1, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+```
+
+B2-ийн `scholarship(3.8, 15, false) == 100` тест мутантыг барьсан: голч яг 3.8 үед мутант 100%-ийн
+салаанд орохгүй 70% буцаасан. Starter-ийн `assertTrue(s1 >= 0 && s1 <= 100)` үүнийг хэзээ ч барихгүй
+байсан. Дараа нь кодыг эх хувилбараар нь буцаасан (мутацийг commit хийгээгүй).
+
+### Өөрийн зохиосон EQUIVALENT мутант: `score >= 90` → `score >= 90 && score <= 100` (23-р мөр)
+
+```
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+> Эх сурвалж: [`results/mvn-test-equivalent-mutant.txt`](results/mvn-test-equivalent-mutant.txt)
+
+20-р мөр 100-аас их онооны үед аль хэдийн exception шиддэг тул 23-р мөрд хүрсэн аливаа `score` заавал
+`<= 100` бөгөөд нэмсэн нөхцөл үргэлж үнэн — програмын зан төлөв ямар ч оролтод өөрчлөгддөггүй. Иймд
+ямар ч тест (эсвэл PIT) энэ мутантыг "алж" чадахгүй: ялгаатай гаралт гаргах оролт **оршихгүй**.
+
+---
+
+## Дүгнэлт
+
+Хамралт ба mutation score өөр асуултад хариулдаг: JaCoCo-гийн Line 100% нь кодын мөр бүр тестийн
+явцад **ажилласныг** л хэлдэг бол mutation score нь кодыг зориуд эвдэхэд тест **унаж чадах эсэхийг**
+хэмждэг — энэ лабд Line 100% хэвээр байхад mutation score 27% → 71% → 100% болж өссөн. Starter-ийн
+багц JaCoCo-д "төгс" харагдаж байсан ч 46 мутантыг амьд үлдээсэн нь хамралт тестийн чанарын
+**доод хязгаар** болохоос нотолгоо биш гэдгийг харуулав. Алдааны хоёр төрөл тодорхой ялгарсан:
+сул assertion (B1 — 28 мутант) ба зааг утгын тест дутуу (B2 — 18 мутант), тус бүрийг өөр арга
+засдаг. Equivalent мутантыг ялгах нь хамгийн болгоомжтой хандах хэсэг байлаа — сэжигтэй харагдсан
+`switch` мутант үнэндээ тест дутуу байсан. AI-аар тест бичүүлэхэд энэ нь онцгой чухал: AI нь кодыг
+"бүрэн хамарсан" олон тест хурдан бичдэг ч `assertNotNull`, `assertTrue(муж)` шиг сул эсвэл заагийн
+утгагүй тест бичих магадлалтай тул хамралт 100% харагдаж болно; mutation score нь тэр тестүүд
+бодитоор алдаа барьж чадах эсэхийг объектив, автоматаар шалгадаг цорын ганц хэмжүүр юм.
+
+---
+
+## AI туслахын хэрэглээ
+
+Энэ лабд **Claude Code (AI туслах)**-ыг ашигласан: B1/B2 тестүүдийг бичих, PIT-ийн XML тайлангаас
+амьд мутант бүрийг алхам бүрийн тайлантай тулгаж ангилах, JaCoCo/PIT-ийн HTML тайлангийн дэлгэцийн
+зургийг (Playwright) авах, README-ийн текстийг бичихэд. Бүх тестийг өөрийн машин дээр ажиллуулж, бүх
+тоог `results/pit-*.txt` ба бусад гаралтын файлаас шалгаж оруулсан.
